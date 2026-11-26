@@ -30,12 +30,14 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 header h1 {
     margin: 0;
-    font-size: 1.3rem;
+    font-size: 1.25rem;
 }
 
 .badge-offline {
@@ -48,24 +50,58 @@ header h1 {
 }
 
 .container {
-    max-width: 1400px;
+    max-width: 1500px;
     margin: 1.5rem auto;
     padding: 0 1.5rem;
 }
 
-.upload-box {
+.input-panel {
     background: var(--card);
-    border: 2px dashed var(--accent);
+    border: 1px solid var(--border);
     border-radius: 8px;
-    padding: 1.5rem;
-    text-align: center;
+    padding: 1.25rem;
     margin-bottom: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.input-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 0.75rem;
+}
+
+@media (max-width: 900px) {
+    .input-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+textarea {
+    width: 100%;
+    min-height: 140px;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-family: Consolas, monospace;
+    font-size: 0.85rem;
+    resize: vertical;
+}
+
+.file-drop {
+    border: 2px dashed var(--accent);
+    border-radius: 6px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.75rem;
+    background: #f8fafc;
 }
 
 .controls {
     display: flex;
-    gap: 1rem;
-    justify-content: center;
+    gap: 0.75rem;
     align-items: center;
     flex-wrap: wrap;
     margin-top: 1rem;
@@ -75,11 +111,11 @@ button {
     background-color: var(--accent);
     color: white;
     border: none;
-    padding: 10px 20px;
+    padding: 9px 16px;
     border-radius: 6px;
     cursor: pointer;
     font-weight: 600;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     transition: background 0.2s;
 }
 
@@ -87,44 +123,78 @@ button:hover {
     background-color: var(--accent-hover);
 }
 
-button.btn-export {
-    background-color: var(--success);
+button.btn-secondary {
+    background-color: #475569;
 }
 
-button.btn-export:hover {
-    background-color: #15803d;
+button.btn-secondary:hover {
+    background-color: #334155;
 }
 
-/* Summary Cards */
+button.btn-danger {
+    background-color: var(--danger);
+}
+
+button.btn-danger:hover {
+    background-color: #b91c1c;
+}
+
+.device-chips {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.75rem;
+}
+
+.chip {
+    background: #e0f2fe;
+    color: #0369a1;
+    border: 1px solid #7dd3fc;
+    padding: 4px 10px;
+    border-radius: 16px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.chip button {
+    background: none;
+    color: #0369a1;
+    padding: 0;
+    font-size: 0.9rem;
+    line-height: 1;
+}
+
 .summary-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
     gap: 1rem;
     margin-bottom: 1.5rem;
 }
 
 .card {
     background: var(--card);
-    padding: 1.2rem;
+    padding: 1.1rem;
     border-radius: 8px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
     border-left: 4px solid var(--accent);
 }
 
 .card h3 {
-    margin: 0 0 0.5rem 0;
-    font-size: 0.85rem;
+    margin: 0 0 0.4rem 0;
+    font-size: 0.8rem;
     text-transform: uppercase;
     color: #64748b;
 }
 
 .card .val {
-    font-size: 1.6rem;
+    font-size: 1.5rem;
     font-weight: bold;
     color: var(--primary);
 }
 
-/* Tabs */
 .tabs {
     display: flex;
     gap: 0.5rem;
@@ -160,40 +230,27 @@ button.btn-export:hover {
     display: block;
 }
 
-/* Search & Tables */
 .search-bar {
     width: 100%;
     padding: 10px;
     margin-bottom: 1rem;
     border: 1px solid var(--border);
     border-radius: 6px;
-    font-size: 0.95rem;
+    font-size: 0.92rem;
 }
 
 .table-wrapper {
     overflow-x: auto;
 }
 
-.vlans-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
-}
-
-@media (max-width: 900px) {
-    .vlans-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
 table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.88rem;
+    font-size: 0.86rem;
 }
 
 th, td {
-    padding: 10px 12px;
+    padding: 9px 11px;
     text-align: left;
     border-bottom: 1px solid var(--border);
     vertical-align: top;
@@ -212,11 +269,31 @@ tr:hover {
 
 .tag {
     display: inline-block;
-    padding: 2px 8px;
+    padding: 2px 7px;
     border-radius: 4px;
-    font-size: 0.78rem;
+    font-size: 0.76rem;
     font-weight: 600;
     margin: 1px;
+}
+
+.tag-default {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.tag-static {
+    background: #e0f2fe;
+    color: #075985;
+}
+
+.tag-proto {
+    background: #f3e8ff;
+    color: #6b21a8;
+}
+
+.tag-local {
+    background: #dcfce7;
+    color: #166534;
 }
 
 .tag-up {
@@ -229,26 +306,6 @@ tr:hover {
     color: #991b1b;
 }
 
-.tag-trunk {
-    background: #fef3c7;
-    color: #92400e;
-}
-
-.tag-access {
-    background: #e0f2fe;
-    color: #075985;
-}
-
-.tag-l3 {
-    background: #f3e8ff;
-    color: #6b21a8;
-}
-
-.tag-po {
-    background: #e2e8f0;
-    color: #1e293b;
-}
-
 code {
     background: #f1f5f9;
     padding: 2px 5px;
@@ -257,14 +314,51 @@ code {
     color: #0f172a;
 }
 
-.raw-block {
-    background: #0f172a;
-    color: #38bdf8;
-    padding: 1rem;
-    border-radius: 6px;
-    font-family: Consolas, monospace;
-    font-size: 0.85rem;
-    white-space: pre-wrap;
-    max-height: 500px;
-    overflow-y: auto;
+.topo-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.topo-legend {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    font-size: 0.82rem;
+    align-items: center;
+}
+
+.legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 4px;
+}
+
+.canvas-scroll {
+    width: 100%;
+    max-height: 760px;
+    overflow: auto;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #f8fafc;
+}
+
+#topoCanvas {
+    display: block;
+    cursor: grab;
+}
+
+#topoCanvas:active {
+    cursor: grabbing;
+}
+
+.topo-hint {
+    font-size: 0.8rem;
+    color: #64748b;
+    margin-top: 0.5rem;
 }

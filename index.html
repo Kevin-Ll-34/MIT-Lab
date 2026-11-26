@@ -3,56 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analizador de Infraestructura - Cisco IOS 15.1 (Offline)</title>
+    <title>Analizador de Rutas y Topología — Cisco IOS 15.1 (Offline)</title>
     <link rel="stylesheet" href="css.css">
 </head>
 <body>
 
 <header>
     <div>
-        <h1>Analizador de Infraestructura Core — Cisco IOS 15.1</h1>
-        <small>Auditoría local de Enrutamiento, Direccionamiento IP, Enlaces, Port-Channels y VLANs</small>
+        <h1>Analizador de Rutas y Topología — Cisco IOS 15.1</h1>
+        <small>Procesamiento 100% local: destino de salida por subred + gráfica nítida y espaciada</small>
     </div>
     <span class="badge-offline">100% OFFLINE / LOCAL</span>
 </header>
 
 <div class="container">
-    <div class="upload-box">
-        <strong>Paso 1:</strong> Selecciona el archivo de configuración del Core (<code>running-config</code> / backup)
-        <div class="controls">
-            <input type="file" id="fileInput" accept=".txt,.cfg,.conf,.log,*">
-            <button id="analyzeBtn" type="button">Analizar Configuración</button>
-            <button class="btn-export" id="exportBtn" type="button" style="display:none;">Exportar Reporte a Excel (CSV)</button>
+    <div class="input-panel">
+        <strong>Cargar o pegar backup(s) de Cisco IOS 15.1</strong> (puedes agregar uno o varios equipos)
+        <div class="input-grid">
+            <textarea id="configTextarea" placeholder="Pega aquí el running-config o startup-config de tu Cisco IOS 15.1..."></textarea>
+            <div class="file-drop">
+                <div>
+                    <label for="fileInput"><strong>Seleccionar archivo de backup:</strong></label><br>
+                    <input type="file" id="fileInput" accept=".txt,.cfg,.conf,.log,*" multiple style="margin-top:6px;">
+                </div>
+                <small style="color:#64748b;">
+                    Puedes pegar el texto directamente a la izquierda, seleccionar uno o más archivos, y presionar <strong>"Agregar y Analizar"</strong>.
+                </small>
+            </div>
         </div>
+        <div class="controls">
+            <button id="addBtn" type="button">Agregar y Analizar</button>
+            <button id="sampleBtn" class="btn-secondary" type="button">Cargar Ejemplo de Prueba</button>
+            <button id="clearBtn" class="btn-danger" type="button">Limpiar Todo</button>
+        </div>
+        <div class="device-chips" id="deviceChips"></div>
     </div>
 
-    <div id="dashboard" style="display:none;">
-        <!-- Resumen Ejecutivo -->
+    <div id="resultsSection" style="display:none;">
         <div class="summary-grid" id="summaryCards"></div>
 
-        <!-- Pestañas -->
         <div class="tabs">
-            <button class="tab-btn active" type="button" data-tab="tab-ips">1. Direccionamiento IP y Subredes</button>
-            <button class="tab-btn" type="button" data-tab="tab-routes">2. Rutas y Enrutamiento (Hacia dónde va)</button>
-            <button class="tab-btn" type="button" data-tab="tab-links">3. Enlaces Físicos, Velocidad y Troncales</button>
-            <button class="tab-btn" type="button" data-tab="tab-vlans">4. VLANs y DHCP Pools</button>
-            <button class="tab-btn" type="button" data-tab="tab-services">5. Redundancia (HSRP/VRRP) y Seguridad</button>
+            <button class="tab-btn active" type="button" data-tab="tab-destinations">1. A Dónde Sale Cada Red</button>
+            <button class="tab-btn" type="button" data-tab="tab-topology">2. Gráfica de Topología de Red</button>
+            <button class="tab-btn" type="button" data-tab="tab-links">3. Enlaces, Velocidades y Rutas</button>
         </div>
 
-        <!-- Tab 1: IPs -->
-        <div id="tab-ips" class="tab-content active">
-            <input type="text" class="search-bar" data-table="table-ips" placeholder="Filtrar por IP, subred, VLAN o descripción (ej. 10.10., Servidores, WAN)...">
+        <div id="tab-destinations" class="tab-content active">
+            <input type="text" class="search-bar" data-table="table-destinations" placeholder="Filtrar por equipo, red/subred, interfaz, siguiente salto (Next-Hop) o destino...">
             <div class="table-wrapper">
-                <table id="table-ips">
+                <table id="table-destinations">
                     <thead>
                         <tr>
-                            <th>Interfaz</th>
-                            <th>Descripción / Destino</th>
-                            <th>Dirección IP</th>
-                            <th>Máscara / CIDR</th>
-                            <th>Red / Rango Útil</th>
-                            <th>VRF / HSRP / Helper (DHCP)</th>
-                            <th>Estado</th>
+                            <th>Equipo</th>
+                            <th>Red / Subred Local</th>
+                            <th>IP Interfaz</th>
+                            <th>A Dónde Sale (Destino / Next-Hop / Protocolo)</th>
+                            <th>Enlace / Interfaz de Salida</th>
+                            <th>Observaciones (VRF / DHCP / HSRP)</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -60,78 +67,62 @@
             </div>
         </div>
 
-        <!-- Tab 2: Rutas -->
-        <div id="tab-routes" class="tab-content">
-            <input type="text" class="search-bar" data-table="table-routes" placeholder="Filtrar rutas por destino, máscara o siguiente salto (Next-Hop)...">
-            <h3>Rutas Estáticas (<code>ip route</code>)</h3>
-            <div class="table-wrapper">
-                <table id="table-routes">
-                    <thead>
-                        <tr>
-                            <th>Tipo</th>
-                            <th>Red Destino</th>
-                            <th>Máscara / CIDR</th>
-                            <th>Siguiente Salto (Next-Hop / Interfaz)</th>
-                            <th>Interfaz de Salida Asociada (Descifrada)</th>
-                            <th>Distancia Adm. / Nombre</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
+        <div id="tab-topology" class="tab-content">
+            <div class="topo-toolbar">
+                <div class="topo-legend">
+                    <span><i class="legend-dot" style="background:#0284c7;"></i>Equipo Cisco / Core</span>
+                    <span><i class="legend-dot" style="background:#16a34a;"></i>Subred / VLAN</span>
+                    <span><i class="legend-dot" style="background:#d97706;"></i>Siguiente Salto / Enlace / WAN</span>
+                    <label style="margin-left:8px;">
+                        <input type="checkbox" id="toggleEdgeLabels" checked> Mostrar etiquetas sobre líneas
+                    </label>
+                </div>
+                <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                    <button id="resetTopoBtn" class="btn-secondary" type="button">Espaciar Uniformemente</button>
+                    <button id="exportPngBtn" type="button">Descargar PNG</button>
+                </div>
             </div>
-            <h3 style="margin-top: 2rem;">Protocolos de Enrutamiento Dinámico (OSPF / EIGRP / BGP)</h3>
-            <div id="dynamic-routing" class="raw-block">No se detectaron protocolos de enrutamiento dinámico.</div>
+            <div class="canvas-scroll">
+                <canvas id="topoCanvas"></canvas>
+            </div>
+            <div class="topo-hint">
+                Arrastra burbujas para ajustar su posición. Usa la rueda del ratón para zoom o arrastra el fondo. El lienzo crece automáticamente para mantener separación vertical uniforme.
+            </div>
         </div>
 
-        <!-- Tab 3: Enlaces y Velocidades -->
         <div id="tab-links" class="tab-content">
-            <input type="text" class="search-bar" data-table="table-links" placeholder="Filtrar por puerto (Gi1/0/1, Te1/1/1), descripción, velocidad, Port-Channel o VLAN...">
+            <input type="text" class="search-bar" data-table="table-links" placeholder="Filtrar por equipo, interfaz, velocidad, troncal, Port-Channel o ruta...">
+            <h3>Interfaces, Velocidades y Troncales</h3>
             <div class="table-wrapper">
                 <table id="table-links">
                     <thead>
                         <tr>
+                            <th>Equipo</th>
                             <th>Interfaz</th>
-                            <th>Descripción (Hacia qué equipo va)</th>
-                            <th>Tipo de Enlace / Velocidad</th>
-                            <th>Modo (Trunk / Access / L3)</th>
-                            <th>Port-Channel</th>
-                            <th>VLANs Permitidas / Nativa</th>
+                            <th>Descripción</th>
+                            <th>Velocidad</th>
+                            <th>Modo / Port-Channel / VLANs</th>
                             <th>Estado</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
                 </table>
             </div>
-        </div>
-
-        <!-- Tab 4: VLANs y DHCP -->
-        <div id="tab-vlans" class="tab-content">
-            <div class="vlans-grid">
-                <div>
-                    <h3>Base de Datos de VLANs</h3>
-                    <table id="table-vlans">
-                        <thead>
-                            <tr><th>VLAN ID</th><th>Nombre</th><th>Interfaz SVI Asociada</th></tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-                <div>
-                    <h3>Pools DHCP Configurados en el Core</h3>
-                    <table id="table-dhcp">
-                        <thead>
-                            <tr><th>Nombre Pool</th><th>Red</th><th>Default Router</th><th>DNS</th></tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
+            <h3 style="margin-top:1.5rem;">Rutas Estáticas y Protocolos Dinámicos Detectados</h3>
+            <div class="table-wrapper">
+                <table id="table-routes-detail">
+                    <thead>
+                        <tr>
+                            <th>Equipo</th>
+                            <th>Tipo</th>
+                            <th>Destino / Red</th>
+                            <th>Siguiente Salto / Parámetros</th>
+                            <th>Interfaz / Enlace Asociado</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
             </div>
-        </div>
-
-        <!-- Tab 5: Servicios y Seguridad -->
-        <div id="tab-services" class="tab-content">
-            <h3>ACLs, NTP, SNMP, AAA y Resumen Crítico</h3>
-            <div id="services-block" class="raw-block"></div>
         </div>
     </div>
 </div>
