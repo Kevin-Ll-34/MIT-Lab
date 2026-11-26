@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analizador de Infraestructura - Cisco IOS 15.1 (Offline)</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header>
+    <div>
+        <h1>Analizador de Infraestructura Core — Cisco IOS 15.1</h1>
+        <small>Auditoría local de Enrutamiento, Direccionamiento IP, Enlaces, Port-Channels y VLANs</small>
+    </div>
+    <span class="badge-offline">100% OFFLINE / LOCAL</span>
+</header>
+
+<div class="container">
+    <div class="upload-box">
+        <strong>Paso 1:</strong> Selecciona el archivo de configuración del Core (<code>running-config</code> / backup)
+        <div class="controls">
+            <input type="file" id="fileInput" accept=".txt,.cfg,.conf,.log,*">
+            <button id="analyzeBtn" type="button">Analizar Configuración</button>
+            <button class="btn-export" id="exportBtn" type="button" style="display:none;">Exportar Reporte a Excel (CSV)</button>
+        </div>
+    </div>
+
+    <div id="dashboard" style="display:none;">
+        <!-- Resumen Ejecutivo -->
+        <div class="summary-grid" id="summaryCards"></div>
+
+        <!-- Pestañas -->
+        <div class="tabs">
+            <button class="tab-btn active" type="button" data-tab="tab-ips">1. Direccionamiento IP y Subredes</button>
+            <button class="tab-btn" type="button" data-tab="tab-routes">2. Rutas y Enrutamiento (Hacia dónde va)</button>
+            <button class="tab-btn" type="button" data-tab="tab-links">3. Enlaces Físicos, Velocidad y Troncales</button>
+            <button class="tab-btn" type="button" data-tab="tab-vlans">4. VLANs y DHCP Pools</button>
+            <button class="tab-btn" type="button" data-tab="tab-services">5. Redundancia (HSRP/VRRP) y Seguridad</button>
+        </div>
+
+        <!-- Tab 1: IPs -->
+        <div id="tab-ips" class="tab-content active">
+            <input type="text" class="search-bar" data-table="table-ips" placeholder="Filtrar por IP, subred, VLAN o descripción (ej. 10.10., Servidores, WAN)...">
+            <div class="table-wrapper">
+                <table id="table-ips">
+                    <thead>
+                        <tr>
+                            <th>Interfaz</th>
+                            <th>Descripción / Destino</th>
+                            <th>Dirección IP</th>
+                            <th>Máscara / CIDR</th>
+                            <th>Red / Rango Útil</th>
+                            <th>VRF / HSRP / Helper (DHCP)</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Tab 2: Rutas -->
+        <div id="tab-routes" class="tab-content">
+            <input type="text" class="search-bar" data-table="table-routes" placeholder="Filtrar rutas por destino, máscara o siguiente salto (Next-Hop)...">
+            <h3>Rutas Estáticas (<code>ip route</code>)</h3>
+            <div class="table-wrapper">
+                <table id="table-routes">
+                    <thead>
+                        <tr>
+                            <th>Tipo</th>
+                            <th>Red Destino</th>
+                            <th>Máscara / CIDR</th>
+                            <th>Siguiente Salto (Next-Hop / Interfaz)</th>
+                            <th>Interfaz de Salida Asociada (Descifrada)</th>
+                            <th>Distancia Adm. / Nombre</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <h3 style="margin-top: 2rem;">Protocolos de Enrutamiento Dinámico (OSPF / EIGRP / BGP)</h3>
+            <div id="dynamic-routing" class="raw-block">No se detectaron protocolos de enrutamiento dinámico.</div>
+        </div>
+
+        <!-- Tab 3: Enlaces y Velocidades -->
+        <div id="tab-links" class="tab-content">
+            <input type="text" class="search-bar" data-table="table-links" placeholder="Filtrar por puerto (Gi1/0/1, Te1/1/1), descripción, velocidad, Port-Channel o VLAN...">
+            <div class="table-wrapper">
+                <table id="table-links">
+                    <thead>
+                        <tr>
+                            <th>Interfaz</th>
+                            <th>Descripción (Hacia qué equipo va)</th>
+                            <th>Tipo de Enlace / Velocidad</th>
+                            <th>Modo (Trunk / Access / L3)</th>
+                            <th>Port-Channel</th>
+                            <th>VLANs Permitidas / Nativa</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Tab 4: VLANs y DHCP -->
+        <div id="tab-vlans" class="tab-content">
+            <div class="vlans-grid">
+                <div>
+                    <h3>Base de Datos de VLANs</h3>
+                    <table id="table-vlans">
+                        <thead>
+                            <tr><th>VLAN ID</th><th>Nombre</th><th>Interfaz SVI Asociada</th></tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div>
+                    <h3>Pools DHCP Configurados en el Core</h3>
+                    <table id="table-dhcp">
+                        <thead>
+                            <tr><th>Nombre Pool</th><th>Red</th><th>Default Router</th><th>DNS</th></tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 5: Servicios y Seguridad -->
+        <div id="tab-services" class="tab-content">
+            <h3>ACLs, NTP, SNMP, AAA y Resumen Crítico</h3>
+            <div id="services-block" class="raw-block"></div>
+        </div>
+    </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
